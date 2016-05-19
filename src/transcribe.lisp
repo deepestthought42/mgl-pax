@@ -1089,7 +1089,7 @@
                                nil)
                               (t (error "Unexpected default syntax ~S."
                                         default-syntax*)))))
-    (swank::with-buffer-syntax ()
+    (slynk::with-buffer-syntax ()
       (multiple-value-bind (string prefix)
           (strip-longest-common-prefix
            string "; " :first-line-special-p first-line-special-p)

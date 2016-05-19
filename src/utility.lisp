@@ -162,7 +162,7 @@
 
 #+allegro
 (progn
-  swank-backend::
+  slynk-backend::
   (unless (get 'function-name 'implementation)
     (defimplementation function-name (f)
       (check-type f function)
@@ -170,7 +170,7 @@
 
 #+allegro
 (progn
-  swank-backend::
+  slynk-backend::
   (unless (get 'find-source-location 'implementation)
     (defimplementation find-source-location (obj)
       (first (rest (first (fspec-definition-locations obj)))))))

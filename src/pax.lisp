@@ -284,8 +284,8 @@
   one of possible definitions.
 
   *Note that the this feature is implemented in terms of
-  SWANK-BACKEND:FIND-SOURCE-LOCATION and
-  SWANK-BACKEND:FIND-DEFINITIONS whose support varies across the Lisp
+  SLYNK-BACKEND:FIND-SOURCE-LOCATION and
+  SLYNK-BACKEND:FIND-DEFINITIONS whose support varies across the Lisp
   implementations.*
 
   In the following examples, pressing `M-.` when the cursor is on one
@@ -327,8 +327,8 @@
 ;;; make-slime-xref.
 (defun locate-definition-for-emacs (name locative-string)
   (let ((locative-string (trim-whitespace locative-string)))
-    (swank-backend::converting-errors-to-error-location
-      (swank::with-buffer-syntax ()
+    (slynk-backend::converting-errors-to-error-location
+      (slynk::with-buffer-syntax ()
         (or
          ;; SECTION class and class SECTION
          ;; SECTION `class` and `class` SECTION
@@ -346,9 +346,9 @@
          (ignore-errors
           (locate-reference-link-definition-for-emacs name))
          ;; [DEFSECTION][]
-         (let* ((swank:*find-definitions-left-trim* "[#:<")
-                (swank:*find-definitions-right-trim* "][,:.>")
-                (locations (swank:find-definitions-for-emacs name)))
+         (let* ((slynk:*find-definitions-left-trim* "[#:<")
+                (slynk:*find-definitions-right-trim* "][,:.>")
+                (locations (slynk:find-definitions-for-emacs name)))
            (if (= (length locations) 1)
                (first (rest (first locations)))
                nil)))))))
@@ -358,7 +358,7 @@
 ;;; serves as a good example.
 (defun locate-definition-for-emacs-1 (name locative-string)
   (multiple-value-bind (symbol found)
-      (swank::find-definitions-find-symbol-or-package name)
+      (slynk::find-definitions-find-symbol-or-package name)
     (when found
       (let ((locative (read-marked-up-locative-from-string locative-string)))
         (when locative
@@ -374,26 +374,26 @@
                     string)))
     (read-locative-from-string string)))
 
-;;; Ensure that some Swank internal facilities (such as
-;;; SWANK::FIND-DEFINITIONS-FIND-SYMBOL-OR-PACKAGE,
-;;; SWANK::WITH-BUFFER-SYNTAX, SWANK::PARSE-SYMBOL) are operational
+;;; Ensure that some Slynk internal facilities (such as
+;;; SLYNK::FIND-DEFINITIONS-FIND-SYMBOL-OR-PACKAGE,
+;;; SLYNK::WITH-BUFFER-SYNTAX, SLYNK::PARSE-SYMBOL) are operational
 ;;; even when not running under Slime.
-(defmacro with-swank (() &body body)
-  `(let* ((swank::*buffer-package* (if (boundp 'swank::*buffer-package*)
-                                       swank::*buffer-package*
+(defmacro with-slynk (() &body body)
+  `(let* ((slynk::*buffer-package* (if (boundp 'slynk::*buffer-package*)
+                                       slynk::*buffer-package*
                                        *package*))
-          (swank::*buffer-readtable*
-            (if (boundp 'swank::*buffer-readtable*)
-                swank::*buffer-readtable*
-                (swank::guess-buffer-readtable swank::*buffer-package*))))
+          (slynk::*buffer-readtable*
+            (if (boundp 'slynk::*buffer-readtable*)
+                slynk::*buffer-readtable*
+                (slynk::guess-buffer-readtable slynk::*buffer-package*))))
      ,@body))
 
 ;;; Like READ-FROM-STRING, but try to avoid interning symbols.
 (defun read-locative-from-string (string)
-  (let ((swank::*buffer-package* *package*))
+  (let ((slynk::*buffer-package* *package*))
     (multiple-value-bind (symbol found)
-        (with-swank ()
-          (swank::find-definitions-find-symbol-or-package string))
+        (with-slynk ()
+          (slynk::find-definitions-find-symbol-or-package string))
       (if found
           symbol
           (let ((first-char-pos (position-if-not #'whitespacep string)))
@@ -404,7 +404,7 @@
               (let ((delimiter-pos (position-if #'delimiterp string
                                                 :start (1+ first-char-pos))))
                 (multiple-value-bind (symbol found)
-                    (swank::parse-symbol
+                    (slynk::parse-symbol
                      (subseq string (1+ first-char-pos) delimiter-pos))
                   (declare (ignore symbol))
                   (when found
@@ -1802,14 +1802,14 @@
 
 (defvar *find-definitions-right-trim* ",:.>")
 
-;;; Lifted from SWANK, and tweaked to return the number of characters
+;;; Lifted from SLYNK, and tweaked to return the number of characters
 ;;; read.
 (defun find-definitions-find-symbol-or-package (name)
   (flet ((do-find (name n)
            (multiple-value-bind (symbol found name)
-               (with-swank ()
-                 (swank::with-buffer-syntax (*package*)
-                   (swank::parse-symbol name)))
+               (with-slynk ()
+                 (slynk::with-buffer-syntax (*package*)
+                   (slynk::parse-symbol name)))
              (cond (found
                     (return-from find-definitions-find-symbol-or-package
                       (values symbol n)))
@@ -1820,7 +1820,7 @@
                       (values (make-symbol name) n)))))))
     (let* ((length (length name))
            (right-trimmed
-             (swank::string-right-trim *find-definitions-right-trim* name))
+             (slynk::string-right-trim *find-definitions-right-trim* name))
            (right-trimmed-length (length right-trimmed)))
       (do-find name length)
       (do-find right-trimmed right-trimmed-length))))
@@ -2134,9 +2134,9 @@
           (massage-docstring string :indentation "")))
 
 (defgeneric find-source (object)
-  (:documentation """Like SWANK:FIND-DEFINITION-FOR-THING, but this
+  (:documentation """Like SLYNK:FIND-DEFINITION-FOR-THING, but this
   one is a generic function to be extensible. In fact, the default
-  implementation simply defers to SWANK:FIND-DEFINITION-FOR-THING.
+  implementation simply defers to SLYNK:FIND-DEFINITION-FOR-THING.
   This function is called by LOCATE-DEFINITION-FOR-EMACS which lies
   behind the `M-.` extension (see @MGL-PAX-EMACS-INTEGRATION).
 
@@ -2155,7 +2155,7 @@
   (:error "Unknown source location for SOMETHING")
   ```""")
   (:method (object)
-    (swank:find-definition-for-thing object)))
+    (slynk:find-definition-for-thing object)))
 
 ;;; A utility for writing FIND-SOURCE methods. Try FILTER-STRINGS one
 ;;; by one, and if one matches exactly one of LOCATIONS, then return
@@ -2571,7 +2571,7 @@
 (defmethod locate-and-find-source (symbol (locative-type (eql 'variable))
                                    locative-args)
   (declare (ignore locative-args))
-  (find-one-location (swank-backend:find-definitions symbol)
+  (find-one-location (slynk-backend:find-definitions symbol)
                      '("variable" "defvar" "defparameter"
                        "special-declaration")))
 
@@ -2608,7 +2608,7 @@
 (defmethod locate-and-find-source (symbol (locative-type (eql 'constant))
                                    locative-args)
   (declare (ignore locative-args))
-  (find-one-location (swank-backend:find-definitions symbol)
+  (find-one-location (slynk-backend:find-definitions symbol)
                      '("defconstant" "constant" "variable")))
 
 
@@ -2694,7 +2694,7 @@
   ;; accessor function, so fall back on FIND-ONE-LOCATION.
   (let ((location (find-source (symbol-function symbol))))
     (if (eq :error (first location))
-        (find-one-location (swank-backend:find-definitions symbol)
+        (find-one-location (slynk-backend:find-definitions symbol)
                            '("function" "operator"))
         location)))
 
@@ -2712,7 +2712,7 @@
                                 locative-args stream)
   (locate-and-print-bullet locative-type locative-args symbol stream)
   (write-char #\Space stream)
-  (let ((arglist (swank-backend:arglist symbol)))
+  (let ((arglist (slynk-backend:arglist symbol)))
     (print-arglist arglist stream)
     (terpri stream)
     (with-dislocated-symbols ((macro-arg-names arglist))
@@ -2738,7 +2738,7 @@
                                 locative-args stream)
   (locate-and-print-bullet locative-type locative-args symbol stream)
   (write-char #\Space stream)
-  (let ((arglist (swank-backend:arglist symbol)))
+  (let ((arglist (slynk-backend:arglist symbol)))
     (print-arglist arglist stream)
     (terpri stream)
     (with-dislocated-symbols ((macro-arg-names arglist))
@@ -2750,7 +2750,7 @@
   #-allegro
   (find-source (compiler-macro-function symbol))
   #+allegro
-  (find-one-location (swank-backend:find-definitions symbol)
+  (find-one-location (slynk-backend:find-definitions symbol)
                      '("compiler-macro")))
 
 
@@ -2758,7 +2758,7 @@
 
 (define-locative-type function ()
   "Note that the arglist in the generated documentation depends on
-  the quality of SWANK-BACKEND:ARGLIST. It may be that default
+  the quality of SLYNK-BACKEND:ARGLIST. It may be that default
   values of optional and keyword arguments are missing.")
 
 (define-locative-type generic-function ())
@@ -2781,16 +2781,16 @@
     function))
 
 (defmethod canonical-reference ((function function))
-  (make-reference (swank-backend:function-name function) 'function))
+  (make-reference (slynk-backend:function-name function) 'function))
 
 (defmethod canonical-reference ((function generic-function))
-  (make-reference (swank-mop:generic-function-name function) 'generic-function))
+  (make-reference (slynk-mop:generic-function-name function) 'generic-function))
 
 (defmethod document-object ((function function) stream)
   (let ((reference (canonical-reference function)))
     (print-bullet reference stream)
     (write-char #\Space stream)
-    (let ((arglist (swank-backend:arglist function)))
+    (let ((arglist (slynk-backend:arglist function)))
       (print-arglist arglist stream)
       (terpri stream)
       (with-dislocated-symbols ((function-arg-names arglist))
@@ -2816,9 +2816,9 @@
       (locate-error)))
 
 (defmethod canonical-reference ((method method))
-  (make-reference (swank-mop:generic-function-name
-                   (swank-mop:method-generic-function method))
-                  `(method ,(swank-mop:method-qualifiers method)
+  (make-reference (slynk-mop:generic-function-name
+                   (slynk-mop:method-generic-function method))
+                  `(method ,(slynk-mop:method-qualifiers method)
                            ,(method-specializers-list method))))
 
 ;;; Return the specializers in a format suitable as the second
@@ -2826,10 +2826,10 @@
 (defun method-specializers-list (method)
   (mapcar (lambda (spec)
             (typecase spec
-              (swank-mop:eql-specializer
-               `(eql ,(swank-mop:eql-specializer-object spec)))
-              (t (swank-mop:class-name spec))))
-          (swank-mop:method-specializers method)))
+              (slynk-mop:eql-specializer
+               `(eql ,(slynk-mop:eql-specializer-object spec)))
+              (t (slynk-mop:class-name spec))))
+          (slynk-mop:method-specializers method)))
 
 (defmethod document-object ((method method) stream)
   (let ((arglist (rest (method-for-inspect-value method))))
@@ -2852,7 +2852,7 @@
               (if (eq spec t)
                   name
                   (list name spec))))
-          (swank-mop:method-lambda-list method)
+          (slynk-mop:method-lambda-list method)
           (method-specializers-list method)))
 
 (defun method-for-inspect-value (method)
@@ -2861,9 +2861,9 @@
   the second element is the method qualifiers, the rest of the list is
   the method's specialiazers (as per
   METHOD-SPECIALIZERS-FOR-INSPECT)."""
-  (append (list (swank-mop:generic-function-name
-                 (swank-mop:method-generic-function method)))
-          (swank-mop:method-qualifiers method)
+  (append (list (slynk-mop:generic-function-name
+                 (slynk-mop:method-generic-function method)))
+          (slynk-mop:method-qualifiers method)
           (method-specializers-for-inspect method)))
 
 
@@ -2895,11 +2895,11 @@
   (make-reference symbol (cons locative-type locative-args)))
 
 (defun find-accessor-slot-definition (accessor-symbol class-symbol)
-  (dolist (slot-def (swank-mop:class-direct-slots (find-class class-symbol)))
+  (dolist (slot-def (slynk-mop:class-direct-slots (find-class class-symbol)))
     (when (and (find accessor-symbol
-                     (swank-mop:slot-definition-readers slot-def))
+                     (slynk-mop:slot-definition-readers slot-def))
                (find `(setf ,accessor-symbol)
-                     (swank-mop:slot-definition-writers slot-def)
+                     (slynk-mop:slot-definition-writers slot-def)
                      :test #'equal))
       (return-from find-accessor-slot-definition slot-def)))
   (locate-error "Could not find accessor ~S for class ~S." accessor-symbol
@@ -2913,8 +2913,8 @@
   (make-reference symbol (cons locative-type locative-args)))
 
 (defun find-reader-slot-definition (accessor-symbol class-symbol)
-  (dolist (slot-def (swank-mop:class-direct-slots (find-class class-symbol)))
-    (when (find accessor-symbol (swank-mop:slot-definition-readers slot-def))
+  (dolist (slot-def (slynk-mop:class-direct-slots (find-class class-symbol)))
+    (when (find accessor-symbol (slynk-mop:slot-definition-readers slot-def))
       (return-from find-reader-slot-definition slot-def)))
   (locate-error "Could not find reader ~S for class ~S." accessor-symbol
                 class-symbol))
@@ -2927,8 +2927,8 @@
   (make-reference symbol (cons locative-type locative-args)))
 
 (defun find-writer-slot-definition (accessor-symbol class-symbol)
-  (dolist (slot-def (swank-mop:class-direct-slots (find-class class-symbol)))
-    (when (find accessor-symbol (swank-mop:slot-definition-writers slot-def))
+  (dolist (slot-def (slynk-mop:class-direct-slots (find-class class-symbol)))
+    (when (find accessor-symbol (slynk-mop:slot-definition-writers slot-def))
       (return-from find-writer-slot-definition slot-def)))
   (locate-error "Could not find writer ~S for class ~S." accessor-symbol
                 class-symbol))
@@ -2956,39 +2956,39 @@
   (locate-and-print-bullet locative-type locative-args symbol stream)
   (write-char #\Space stream)
   (print-arglist locative-args stream)
-  (when (or (swank-mop:slot-definition-initargs slot-def)
-            (swank-mop:slot-definition-initfunction slot-def))
+  (when (or (slynk-mop:slot-definition-initargs slot-def)
+            (slynk-mop:slot-definition-initfunction slot-def))
     (write-char #\Space stream)
     (if (and *document-mark-up-signatures* (eq *format* :html))
         (let ((initarg-strings
-                (when (swank-mop:slot-definition-initargs slot-def)
+                (when (slynk-mop:slot-definition-initargs slot-def)
                   (mapcar #'prin1-and-escape-markdown
-                          (swank-mop:slot-definition-initargs slot-def)))))
+                          (slynk-mop:slot-definition-initargs slot-def)))))
           (print-arglist
            (format nil "(~{~A~^ ~}~A)" initarg-strings
-                   (if (swank-mop:slot-definition-initfunction slot-def)
+                   (if (slynk-mop:slot-definition-initfunction slot-def)
                        (format nil "~A= ~A"
                                (if initarg-strings " " "")
                                (replace-known-references
                                 (prin1-and-escape-markdown
-                                 (swank-mop:slot-definition-initform
+                                 (slynk-mop:slot-definition-initform
                                   slot-def))))
                        ""))
            stream))
         (print-arglist
          (prin1-to-string
-          `(,@(when (swank-mop:slot-definition-initargs slot-def)
-                (swank-mop:slot-definition-initargs slot-def))
-            ,@(when (swank-mop:slot-definition-initfunction slot-def)
+          `(,@(when (slynk-mop:slot-definition-initargs slot-def)
+                (slynk-mop:slot-definition-initargs slot-def))
+            ,@(when (slynk-mop:slot-definition-initfunction slot-def)
                 `(=
-                  ,(swank-mop:slot-definition-initform slot-def)))))
+                  ,(slynk-mop:slot-definition-initform slot-def)))))
          stream)))
   (terpri stream)
   ;; No documentation for condition accessors, and some
   ;; implementations signal warnings.
   (with-dislocated-symbols ((list symbol))
     (unless (subtypep (find-class (first locative-args)) 'condition)
-      (let ((docstring (swank-mop:slot-definition-documentation slot-def)))
+      (let ((docstring (slynk-mop:slot-definition-documentation slot-def)))
         (when docstring
           (format stream "~%~A~%" (massage-docstring docstring)))))))
 
@@ -3018,14 +3018,14 @@
   specifiers.")
 
 (defmethod locate-object (symbol (locative-type (eql 'type)) locative-args)
-  (unless (swank-backend:type-specifier-p 'symbol)
+  (unless (slynk-backend:type-specifier-p 'symbol)
     (locate-error))
   (make-reference symbol (cons locative-type locative-args)))
 
 (defmethod locate-and-document (symbol (locative-type (eql 'type)) locative-args
                                 stream)
   (locate-and-print-bullet locative-type locative-args symbol stream)
-  (let ((arglist (swank-backend:type-specifier-arglist symbol)))
+  (let ((arglist (slynk-backend:type-specifier-arglist symbol)))
     (when (and arglist (not (eq arglist :not-available)))
       (write-char #\Space stream)
       (print-arglist arglist stream)))
@@ -3036,7 +3036,7 @@
 (defmethod locate-and-find-source (symbol (locative-type (eql 'type))
                                    locative-args)
   (declare (ignore locative-args))
-  (find-one-location (swank-backend:find-definitions symbol)
+  (find-one-location (slynk-backend:find-definitions symbol)
                      '("type" "class")))
 
 
@@ -3072,7 +3072,7 @@
                         (or (eq name 'standard-object)
                             (and conditionp (eq name 'condition))))
                       (mapcar #'class-name
-                              (swank-mop:class-direct-superclasses class)))))
+                              (slynk-mop:class-direct-superclasses class)))))
     (print-bullet class stream)
     (when superclasses
       (write-char #\Space stream)

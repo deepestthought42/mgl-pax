@@ -338,8 +338,8 @@ popping up an xref buffer and letting the user interactively select
 one of possible definitions.</p>
 
 <p><em>Note that the this feature is implemented in terms of
-<code>SWANK-BACKEND:FIND-SOURCE-LOCATION</code> and
-<code>SWANK-BACKEND:FIND-DEFINITIONS</code> whose support varies across the Lisp
+<code>SLYNK-BACKEND:FIND-SOURCE-LOCATION</code> and
+<code>SLYNK-BACKEND:FIND-DEFINITIONS</code> whose support varies across the Lisp
 implementations.</em></p>
 
 <p>In the following examples, pressing <code>M-.</code> when the cursor is on one
@@ -1044,7 +1044,7 @@ the value of the constant is included in the documentation.</p></li>
 <li><p><span class="locative-type"><a href="https://github.com/melisgl/mgl-pax/blob/3fb27a3faa1560b1e113f35bc09f72ab4cbfdff8/src/pax.lisp#L2743">[locative]</a></span> <span class="reference-object"><a href="#x-28FUNCTION-20-28MGL-PAX-3ALOCATIVE-29-29" >FUNCTION</a></span></p>
 
 <p>Note that the arglist in the generated documentation depends on
-the quality of <code>SWANK-BACKEND:ARGLIST</code>. It may be that default
+the quality of <code>SLYNK-BACKEND:ARGLIST</code>. It may be that default
 values of optional and keyword arguments are missing.</p></li>
 </ul>
 
@@ -1546,9 +1546,9 @@ leading spaces that is common to all non-blank lines.</p></li>
 <ul>
 <li><p><span class="locative-type"><a href="https://github.com/melisgl/mgl-pax/blob/3fb27a3faa1560b1e113f35bc09f72ab4cbfdff8/src/pax.lisp#L2120">[generic-function]</a></span> <span class="reference-object"><a href="#x-28MGL-PAX-3AFIND-SOURCE-20GENERIC-FUNCTION-29" >FIND-SOURCE</a></span> <span class="locative-args">OBJECT</span></p>
 
-<p>Like <code>SWANK:FIND-DEFINITION-FOR-THING</code>, but this
+<p>Like <code>SLYNK:FIND-DEFINITION-FOR-THING</code>, but this
 one is a generic function to be extensible. In fact, the default
-implementation simply defers to <code>SWANK:FIND-DEFINITION-FOR-THING</code>.
+implementation simply defers to <code>SLYNK:FIND-DEFINITION-FOR-THING</code>.
 This function is called by <code>LOCATE-DEFINITION-FOR-EMACS</code> which lies
 behind the <code>M-.</code> extension (see <a href="#x-28MGL-PAX-3A-40MGL-PAX-EMACS-INTEGRATION-20MGL-PAX-3ASECTION-29" title="Emacs Integration">Emacs Integration</a>).</p>
 
@@ -1605,7 +1605,7 @@ of how the <a href="#x-28VARIABLE-20-28MGL-PAX-3ALOCATIVE-29-29" title="(VARIABL
 <span class="paren1">(<span class="code"><i><span class="symbol">defmethod</span></i> locate-and-find-source <span class="paren2">(<span class="code">symbol <span class="paren3">(<span class="code">locative-type <span class="paren4">(<span class="code">eql 'variable</span>)</span></span>)</span>
                                    locative-args</span>)</span>
   <span class="paren2">(<span class="code">declare <span class="paren3">(<span class="code">ignore locative-args</span>)</span></span>)</span>
-  <span class="paren2">(<span class="code">find-one-location <span class="paren3">(<span class="code">swank-backend:find-definitions symbol</span>)</span>
+  <span class="paren2">(<span class="code">find-one-location <span class="paren3">(<span class="code">slynk-backend:find-definitions symbol</span>)</span>
                      '<span class="paren3">(<span class="code"><span class="string">"variable"</span> <span class="string">"defvar"</span> <span class="string">"defparameter"</span>
                        <span class="string">"special-declaration"</span></span>)</span></span>)</span></span>)</span>
 </span></code></pre>

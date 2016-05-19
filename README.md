@@ -297,8 +297,8 @@ popping up an xref buffer and letting the user interactively select
 one of possible definitions.
 
 *Note that the this feature is implemented in terms of
-`SWANK-BACKEND:FIND-SOURCE-LOCATION` and
-`SWANK-BACKEND:FIND-DEFINITIONS` whose support varies across the Lisp
+`SLYNK-BACKEND:FIND-SOURCE-LOCATION` and
+`SLYNK-BACKEND:FIND-DEFINITIONS` whose support varies across the Lisp
 implementations.*
 
 In the following examples, pressing `M-.` when the cursor is on one
@@ -947,7 +947,7 @@ locatives take no arguments.
 - [locative] **FUNCTION**
 
     Note that the arglist in the generated documentation depends on
-    the quality of `SWANK-BACKEND:ARGLIST`. It may be that default
+    the quality of `SLYNK-BACKEND:ARGLIST`. It may be that default
     values of optional and keyword arguments are missing.
 
 <a id='x-28GENERIC-FUNCTION-20-28MGL-PAX-3ALOCATIVE-29-29'></a>
@@ -1376,9 +1376,9 @@ for [`ASDF:SYSTEM:`][bf8a]
 
 - [generic-function] **FIND-SOURCE** *OBJECT*
 
-    Like `SWANK:FIND-DEFINITION-FOR-THING`, but this
+    Like `SLYNK:FIND-DEFINITION-FOR-THING`, but this
     one is a generic function to be extensible. In fact, the default
-    implementation simply defers to `SWANK:FIND-DEFINITION-FOR-THING`.
+    implementation simply defers to `SLYNK:FIND-DEFINITION-FOR-THING`.
     This function is called by `LOCATE-DEFINITION-FOR-EMACS` which lies
     behind the `M-.` extension (see [Emacs Integration][eff4]).
     
@@ -1438,7 +1438,7 @@ of how the [`VARIABLE`][2be0] locative is defined:
 (defmethod locate-and-find-source (symbol (locative-type (eql 'variable))
                                    locative-args)
   (declare (ignore locative-args))
-  (find-one-location (swank-backend:find-definitions symbol)
+  (find-one-location (slynk-backend:find-definitions symbol)
                      '("variable" "defvar" "defparameter"
                        "special-declaration")))
 
